@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook:latest
+FROM narenarya/plotlab:latest
 
 USER root
 
@@ -22,10 +22,17 @@ RUN \
     apt-get clean  && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget https://bootstrap.pypa.io/get-pip.py
 
-RUN python2.7 get-pip.py
+# Install sbt
+RUN wget http://dl.bintray.com/sbt/debian/sbt-0.13.11.deb && \
+  dpkg -i sbt-0.13.11.deb
+RUN apt-get update && apt-get install sbt
 
-RUN sudo pip2.7 install plotly
+# Install ammonite
+RUN apt-get update && apt-get install -y curl
+RUN curl -L -o amm https://git.io/vafIQ && chmod +x amm && mv amm /usr/local/bin
 
-USER jovyan
+# Publish fuzzy-k-means into local .ivy2 repo
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/ShokuninSan/fuzzy-k-means.git
+RUN cd fuzzy-k-means && sbt publishLocal
